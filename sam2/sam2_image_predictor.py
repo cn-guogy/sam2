@@ -245,37 +245,21 @@ class SAM2ImagePredictor:
         normalize_coords=True,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
-        Predict masks for the given input prompts, using the currently set image.
+        根据给定的输入提示预测掩码，使用当前设置的图像。
 
-        Arguments:
-          point_coords (np.ndarray or None): A Nx2 array of point prompts to the
-            model. Each point is in (X,Y) in pixels.
-          point_labels (np.ndarray or None): A length N array of labels for the
-            point prompts. 1 indicates a foreground point and 0 indicates a
-            background point.
-          box (np.ndarray or None): A length 4 array given a box prompt to the
-            model, in XYXY format.
-          mask_input (np.ndarray): A low resolution mask input to the model, typically
-            coming from a previous prediction iteration. Has form 1xHxW, where
-            for SAM, H=W=256.
-          multimask_output (bool): If true, the model will return three masks.
-            For ambiguous input prompts (such as a single click), this will often
-            produce better masks than a single prediction. If only a single
-            mask is needed, the model's predicted quality score can be used
-            to select the best mask. For non-ambiguous prompts, such as multiple
-            input prompts, multimask_output=False can give better results.
-          return_logits (bool): If true, returns un-thresholded masks logits
-            instead of a binary mask.
-          normalize_coords (bool): If true, the point coordinates will be normalized to the range [0,1] and point_coords is expected to be wrt. image dimensions.
+        参数:
+          point_coords (np.ndarray 或 None): 一个 Nx2 的数组，表示模型的点提示。每个点的格式为 (X,Y)，单位为像素。
+          point_labels (np.ndarray 或 None): 一个长度为 N 的数组，表示点提示的标签。1 表示前景点，0 表示背景点。
+          box (np.ndarray 或 None): 一个长度为 4 的数组，表示模型的框提示，格式为 XYXY。
+          mask_input (np.ndarray): 模型的低分辨率掩码输入，通常来自之前预测迭代的结果。格式为 1xHxW，对于 SAM，H=W=256。
+          multimask_output (bool): 如果为 True，模型将返回三个掩码。对于模糊的输入提示（例如单个点击），这通常会产生比单个预测更好的掩码。如果只需要一个掩码，可以使用模型的预测质量分数来选择最佳掩码。对于非模糊提示（例如多个输入提示），multimask_output=False 可以产生更好的结果。
+          return_logits (bool): 如果为 True，返回未阈值化的掩码 logits 而不是二值掩码。
+          normalize_coords (bool): 如果为 True，点坐标将被归一化到 [0,1] 范围内，并且 point_coords 预计相对于图像尺寸。
 
-        Returns:
-          (np.ndarray): The output masks in CxHxW format, where C is the
-            number of masks, and (H, W) is the original image size.
-          (np.ndarray): An array of length C containing the model's
-            predictions for the quality of each mask.
-          (np.ndarray): An array of shape CxHxW, where C is the number
-            of masks and H=W=256. These low resolution logits can be passed to
-            a subsequent iteration as mask input.
+        返回:
+          (np.ndarray): 输出掩码，格式为 CxHxW，其中 C 是掩码数量，(H, W) 是原始图像尺寸。
+          (np.ndarray): 一个长度为 C 的数组，包含模型对每个掩码的质量预测。
+          (np.ndarray): 一个形状为 CxHxW 的数组，其中 C 是掩码数量，H=W=256。这些低分辨率 logits 可以传递给后续迭代作为掩码输入。
         """
         if not self._is_image_set:
             raise RuntimeError(
