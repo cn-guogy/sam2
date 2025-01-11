@@ -9,7 +9,7 @@ import warnings
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision.transforms import Normalize, Resize, ToTensor
+from torchvision.transforms import Resize,Normalize,ToTensor,Compose,ToPILImage
 
 
 class SAM2Transforms(nn.Module):
@@ -27,12 +27,14 @@ class SAM2Transforms(nn.Module):
         self.mean = [0.485, 0.456, 0.406]
         self.std = [0.229, 0.224, 0.225]
         self.to_tensor = ToTensor()
-        self.transforms = torch.jit.script(
-            nn.Sequential(
-                Resize((self.resolution, self.resolution)),
-                Normalize(self.mean, self.std),
-            )
-        )
+        
+        # 使用 Compose 来组合这些转换
+        self.transforms = Compose([
+            ToPILImage(),
+            Resize((self.resolution, self.resolution)),
+            ToTensor(),  # 确保 ToTensor() 转换在 Normalize 之前
+            Normalize(self.mean, self.std)
+        ])
 
     def __call__(self, x):
         x = self.to_tensor(x)

@@ -28,9 +28,16 @@ class Seg:
         image_path, gt_path, mask_path, prob_path = self.set_path(dir, image)
         img = self.set_image(image_path)
         input_point, input_label = self.set_point(gt_path)
-        masks, scores, logits = self.seg(input_point, input_label, return_logits=True)
-        self.save_mask(masks, mask_path)
-        self.save_probabilities(masks, prob_path)
+        if len(input_point) == 0:
+            gt_image = Image.open(gt_path)
+            plt.imsave(mask_path, gt_image, cmap="gray")
+            plt.imsave(prob_path, gt_image, cmap="gray")
+        else:
+            masks, scores, logits = self.seg(
+                input_point, input_label, return_logits=True
+            )
+            self.save_mask(masks, mask_path)
+            self.save_probabilities(masks, prob_path)
         print("make seg over")
 
     # 加载图片
@@ -48,7 +55,11 @@ class Seg:
         image = Image.open(gt_path)
         image = np.array(image.convert("L"))
         white_pixels = np.argwhere(image == 255)
-        for i in range(0, len(white_pixels), 600):
+        n = 6
+        x = int(len(white_pixels) / n)
+        if x == 0:
+            x = 1
+        for i in range(0, len(white_pixels), x):
             y, x = white_pixels[i]
             point_coords.append([x, y])
             point_labels.append(1)
